@@ -1,571 +1,2876 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAWI BOT AI - Smart NAWI Testing & Report System</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- QRCode.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- html2pdf.js for PDF Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
 
-    <style>
-        .step-active { border-color: #0284C7; background-color: #E0F2FE; color: #0369A1; }
-        .step-done { border-color: #10B981; background-color: #D1FAE5; color: #047857; }
-        @media print { .no-print { display: none !important; } }
-    </style>
+<title>NAWI BOT AI - Smart Testing System</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    background:#f1f5f9;
+    color:#172033;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow-x:hidden;
+}
+
+button,
+input,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+img{
+    max-width:100%;
+}
+
+.main-container{
+    width:100%;
+    max-width:1200px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    border:1px solid #e2e8f0;
+    border-radius:18px;
+    box-shadow:0 4px 14px rgba(15,23,42,.06);
+}
+
+.step-active{
+    border-color:#0284c7!important;
+    background:#e0f2fe!important;
+    color:#0369a1!important;
+}
+
+.step-done{
+    border-color:#10b981!important;
+    background:#d1fae5!important;
+    color:#047857!important;
+}
+
+.page{
+    width:100%;
+}
+
+.hidden-page{
+    display:none!important;
+}
+
+/* History */
+
+.history-chart{
+    width:100%;
+    height:210px;
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+    padding:20px 10px 5px;
+    border-bottom:1px solid #cbd5e1;
+    overflow:hidden;
+}
+
+.chart-column{
+    flex:1;
+    min-width:20px;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    align-items:center;
+    gap:5px;
+}
+
+.chart-value{
+    font-size:10px;
+    font-weight:bold;
+    color:#334155;
+}
+
+.chart-bar{
+    width:100%;
+    max-width:42px;
+    min-height:5px;
+    background:#0284c7;
+    border-radius:8px 8px 2px 2px;
+}
+
+.chart-date{
+    font-size:9px;
+    color:#64748b;
+    white-space:nowrap;
+}
+
+/* History result cards */
+
+.history-result{
+    border:1px solid #e2e8f0;
+    border-radius:16px;
+    background:#fff;
+    overflow:hidden;
+    margin-bottom:18px;
+}
+
+.history-result-header{
+    padding:15px;
+    background:#f8fafc;
+    border-bottom:1px solid #e2e8f0;
+}
+
+/* Report */
+
+.report-wrap{
+    background:#fff;
+}
+
+.report-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+.report-table th,
+.report-table td{
+    border:1px solid #cbd5e1;
+    padding:9px;
+    word-break:break-word;
+}
+
+.status-pass{
+    color:#047857;
+    background:#d1fae5;
+    border:1px solid #a7f3d0;
+}
+
+.status-fail{
+    color:#be123c;
+    background:#ffe4e6;
+    border:1px solid #fecdd3;
+}
+
+/* RS232 animation */
+
+.search-animation{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.search-dot{
+    width:8px;
+    height:8px;
+    background:#0284c7;
+    border-radius:50%;
+    animation:pulseDot 1.2s infinite;
+}
+
+.search-dot:nth-child(2){
+    animation-delay:.2s;
+}
+
+.search-dot:nth-child(3){
+    animation-delay:.4s;
+}
+
+@keyframes pulseDot{
+    0%,100%{
+        opacity:.2;
+        transform:scale(.7);
+    }
+    50%{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+/* Mobile */
+
+@media(max-width:700px){
+
+    .header-inner{
+        padding:12px!important;
+    }
+
+    .brand-title{
+        font-size:21px!important;
+    }
+
+    .brand-subtitle{
+        font-size:10px!important;
+    }
+
+    .logo-box{
+        width:55px!important;
+        height:55px!important;
+    }
+
+    .workflow-grid{
+        grid-template-columns:1fr 1fr!important;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr!important;
+    }
+
+    .top-grid{
+        grid-template-columns:1fr!important;
+    }
+
+    .report-wrap{
+        padding:15px!important;
+    }
+
+    .report-title{
+        font-size:22px!important;
+    }
+
+    .report-table{
+        font-size:10px;
+    }
+
+    .report-table th,
+    .report-table td{
+        padding:5px 3px;
+    }
+
+    .history-chart{
+        height:170px;
+        gap:5px;
+    }
+
+}
+
+@media print{
+
+    .no-print{
+        display:none!important;
+    }
+
+    body{
+        background:#fff;
+    }
+
+    .report-wrap{
+        border:0!important;
+        box-shadow:none!important;
+    }
+}
+
+</style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Header / Navbar -->
-    <header class="bg-slate-900 text-white shadow-md no-print">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-xl flex items-center justify-center w-10 h-10 shadow">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-wide text-blue-400">NAWI BOT AI</h1>
-                    <p class="text-xs text-slate-400">Smart NAWI Testing & OIML R-76 Compliance System</p>
-                </div>
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="bg-slate-900 text-white shadow-md no-print">
+
+<div class="main-container header-inner px-4 py-3
+flex justify-between items-center gap-3">
+
+<div class="flex items-center gap-3 min-w-0">
+
+<div class="logo-box bg-white rounded-xl overflow-hidden
+flex-shrink-0 flex items-center justify-center"
+style="width:68px;height:68px;">
+
+<img
+src="nawi-bot.png"
+alt="NAWI BOT"
+style="width:100%;height:100%;object-fit:contain;"
+onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex';">
+
+<div id="logoFallback"
+style="display:none"
+class="w-full h-full items-center justify-center
+bg-blue-600 text-white text-2xl">
+
+<i class="fa-solid fa-robot"></i>
+
+</div>
+
+</div>
+
+
+<div class="min-w-0">
+
+<h1 class="brand-title text-3xl font-bold text-blue-400">
+NAWI BOT AI
+</h1>
+
+<p class="brand-subtitle text-sm text-slate-400">
+Smart NAWI Testing & OIML R-76 Compliance System
+</p>
+
+</div>
+
+</div>
+
+
+<div class="flex items-center gap-2 flex-shrink-0">
+
+<span class="hidden sm:inline-flex items-center
+px-3 py-1 rounded-full text-xs
+bg-emerald-500/10 text-emerald-400
+border border-emerald-500/20">
+
+<span class="w-2 h-2 mr-2 bg-emerald-400 rounded-full"></span>
+
+Offline Mode Ready
+
+</span>
+
+
+<span class="text-xs bg-slate-800 px-3 py-2
+rounded-md border border-slate-700 font-mono">
+
+SIH26035
+
+</span>
+
+</div>
+
+</div>
+
+</header>
+
+
+
+<main class="main-container px-4 py-6">
+
+
+<!-- =====================================================
+     HOME PAGE
+===================================================== -->
+
+<div id="homePage" class="page">
+
+
+<!-- TOP CARDS -->
+
+<div class="top-grid grid grid-cols-4 gap-4 mb-6 no-print">
+
+
+<div class="card p-4 flex items-center gap-4">
+
+<div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
+<i class="fa-solid fa-scale-balanced text-xl"></i>
+</div>
+
+<div>
+
+<p class="text-xs text-slate-500">
+Testing Standard
+</p>
+
+<p class="font-bold">
+OIML R-76 Compliant
+</p>
+
+</div>
+
+</div>
+
+
+<div class="card p-4 flex items-center gap-4">
+
+<div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+<i class="fa-solid fa-circle-check text-xl"></i>
+</div>
+
+<div>
+
+<p class="text-xs text-slate-500">
+Evaluation Mode
+</p>
+
+<p class="font-bold">
+Automated MPE Check
+</p>
+
+</div>
+
+</div>
+
+
+<!-- RS232 -->
+
+<div
+onclick="openHardwareModal()"
+class="card p-4 flex items-center gap-4
+cursor-pointer hover:border-blue-400">
+
+<div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
+
+<i class="fa-solid fa-plug text-xl"></i>
+
+</div>
+
+<div>
+
+<p class="text-xs text-slate-500">
+Hardware Interface
+</p>
+
+<p class="font-bold text-blue-600">
+RS-232 / Bluetooth
+</p>
+
+</div>
+
+</div>
+
+
+<!-- HISTORY -->
+
+<div
+onclick="openHistoryPage()"
+class="card p-4 flex items-center gap-4
+cursor-pointer hover:border-indigo-400">
+
+<div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+
+<i class="fa-solid fa-clock-rotate-left text-xl"></i>
+
+</div>
+
+<div>
+
+<p class="text-xs text-slate-500">
+Records
+</p>
+
+<p class="font-bold text-indigo-600">
+History
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- WORKFLOW -->
+
+<div class="card p-4 mb-6 no-print">
+
+<h2 class="text-xs font-bold text-slate-400
+uppercase tracking-wider mb-3">
+
+System Workflow
+
+</h2>
+
+
+<div class="workflow-grid grid grid-cols-6 gap-2
+text-center text-xs font-medium">
+
+
+<div id="step-btn-1"
+class="step-active border-2 p-2 rounded-lg">
+
+1. Instrument Reg.
+
+</div>
+
+
+<div id="step-btn-2"
+class="border-2 border-slate-200 p-2
+rounded-lg text-slate-400">
+
+2. Test Entry
+
+</div>
+
+
+<div id="step-btn-3"
+class="border-2 border-slate-200 p-2
+rounded-lg text-slate-400">
+
+3. Calculation
+
+</div>
+
+
+<div id="step-btn-4"
+class="border-2 border-slate-200 p-2
+rounded-lg text-slate-400">
+
+4. OIML R-76 Rules
+
+</div>
+
+
+<div id="step-btn-5"
+class="border-2 border-slate-200 p-2
+rounded-lg text-slate-400">
+
+5. Result
+
+</div>
+
+
+<div id="step-btn-6"
+class="border-2 border-slate-200 p-2
+rounded-lg text-slate-400">
+
+6. Report PDF
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     APP
+===================================================== -->
+
+<div id="app" class="card p-6 no-print">
+
+
+<!-- STEP 1 -->
+
+<section id="step-1" class="step space-y-4">
+
+<h3 class="text-xl font-bold">
+
+<i class="fa-solid fa-id-card text-blue-600 mr-2"></i>
+
+Instrument Registration
+
+</h3>
+
+
+<p class="text-xs text-slate-500">
+
+Enter NAWI technical specifications.
+
+</p>
+
+
+<div class="form-grid grid grid-cols-3 gap-4">
+
+
+<div>
+
+<label class="text-xs font-bold">
+Manufacturer
+</label>
+
+<input
+id="manufacturer"
+value="Essae-Teraoka"
+class="w-full mt-1 px-3 py-2
+border rounded-lg outline-none
+focus:border-blue-500">
+
+</div>
+
+
+<div>
+
+<label class="text-xs font-bold">
+Model Name / No.
+</label>
+
+<input
+id="modelNo"
+value="DS-852 Digital Scale"
+class="w-full mt-1 px-3 py-2
+border rounded-lg outline-none
+focus:border-blue-500">
+
+</div>
+
+
+<div>
+
+<label class="text-xs font-bold">
+Serial Number
+</label>
+
+<input
+id="serialNo"
+value="SN-2026-9948"
+class="w-full mt-1 px-3 py-2
+border rounded-lg outline-none
+focus:border-blue-500">
+
+</div>
+
+
+<div>
+
+<label class="text-xs font-bold">
+Max Capacity (kg)
+</label>
+
+<input
+id="maxCap"
+type="number"
+value="50"
+class="w-full mt-1 px-3 py-2 border rounded-lg">
+
+</div>
+
+
+<div>
+
+<label class="text-xs font-bold">
+Verification Scale Interval (e)
+</label>
+
+<input
+id="scaleE"
+type="number"
+value="10"
+class="w-full mt-1 px-3 py-2 border rounded-lg">
+
+</div>
+
+
+<div>
+
+<label class="text-xs font-bold">
+Accuracy Class
+</label>
+
+<select
+id="accuracyClass"
+class="w-full mt-1 px-3 py-2
+border rounded-lg bg-white">
+
+<option>Class III</option>
+<option>Class II</option>
+<option>Class IIII</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div class="flex justify-end pt-4">
+
+<button
+onclick="goToStep(2)"
+class="bg-blue-600 hover:bg-blue-700
+text-white px-5 py-2 rounded-lg">
+
+Next: Test Data
+
+<i class="fa-solid fa-arrow-right ml-2"></i>
+
+</button>
+
+</div>
+
+</section>
+
+
+
+<!-- STEP 2 -->
+
+<section id="step-2" class="step hidden space-y-4">
+
+<div class="flex justify-between items-center gap-3">
+
+<h3 class="text-xl font-bold">
+
+<i class="fa-solid fa-vial text-blue-600 mr-2"></i>
+
+Test Data Entry
+
+</h3>
+
+
+<button
+onclick="openHardwareModal()"
+class="bg-blue-50 text-blue-700
+border border-blue-200 px-3 py-2
+rounded-lg text-xs">
+
+<i class="fa-solid fa-plug mr-1"></i>
+
+Hardware Interface
+
+</button>
+
+</div>
+
+
+<div class="form-grid grid grid-cols-3 gap-4">
+
+
+<div>
+
+<label class="text-xs font-bold">
+Standard Reference Weight (kg)
+</label>
+
+<input
+id="refWeight"
+type="number"
+step="0.01"
+value="10.00"
+class="w-full mt-1 px-3 py-2
+border rounded-lg">
+
+</div>
+
+
+<div>
+
+<label class="text-xs font-bold">
+Scale Indicated Weight (kg)
+</label>
+
+<input
+id="indWeight"
+type="number"
+step="0.01"
+value="10.01"
+class="w-full mt-1 px-3 py-2
+border rounded-lg">
+
+</div>
+
+
+<div>
+
+<label class="text-xs font-bold">
+Testing Load Condition
+</label>
+
+<select
+id="loadCondition"
+class="w-full mt-1 px-3 py-2
+border rounded-lg bg-white">
+
+<option>Increasing Load</option>
+<option>Decreasing Load</option>
+<option>Eccentricity Test</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div class="flex justify-between pt-4">
+
+<button
+onclick="goToStep(1)"
+class="bg-slate-200 px-4 py-2 rounded-lg">
+
+Back
+
+</button>
+
+
+<button
+onclick="calculateErrors()"
+class="bg-blue-600 text-white px-5 py-2 rounded-lg">
+
+Next: Calculation
+
+</button>
+
+</div>
+
+</section>
+
+
+
+<!-- STEP 3 -->
+
+<section id="step-3" class="step hidden space-y-4">
+
+<h3 class="text-xl font-bold">
+
+<i class="fa-solid fa-calculator
+text-blue-600 mr-2"></i>
+
+Error Calculation
+
+</h3>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+
+<div class="bg-slate-50 p-5 rounded-xl text-center">
+
+<p class="text-xs text-slate-500">
+Reference Weight
+</p>
+
+<p id="calcRef"
+class="text-xl font-bold">
+10.00 kg
+</p>
+
+</div>
+
+
+<div class="bg-slate-50 p-5 rounded-xl text-center">
+
+<p class="text-xs text-slate-500">
+Indicated Weight
+</p>
+
+<p id="calcInd"
+class="text-xl font-bold">
+10.01 kg
+</p>
+
+</div>
+
+</div>
+
+
+<div class="bg-blue-50 border border-blue-200
+p-6 rounded-xl text-center">
+
+<p class="text-xs font-bold text-blue-600">
+CALCULATED ERROR
+</p>
+
+<p id="errorResult"
+class="text-4xl font-black text-blue-700 mt-2">
+
++10.0 g
+
+</p>
+
+</div>
+
+
+<div class="flex justify-between">
+
+<button
+onclick="goToStep(2)"
+class="bg-slate-200 px-4 py-2 rounded-lg">
+
+Back
+
+</button>
+
+
+<button
+onclick="applyRules()"
+class="bg-blue-600 text-white
+px-5 py-2 rounded-lg">
+
+Next: OIML Rules
+
+</button>
+
+</div>
+
+</section>
+
+
+
+<!-- STEP 4 -->
+
+<section id="step-4" class="step hidden space-y-4">
+
+<h3 class="text-xl font-bold">
+
+<i class="fa-solid fa-scale-balanced
+text-blue-600 mr-2"></i>
+
+OIML R-76 MPE Rules
+
+</h3>
+
+
+<div class="bg-slate-50 p-5 rounded-xl space-y-4">
+
+
+<div class="flex justify-between gap-4">
+
+<span>Accuracy Class</span>
+
+<b id="ruleClass">
+Class III
+</b>
+
+</div>
+
+
+<div class="flex justify-between gap-4">
+
+<span>Scale Interval</span>
+
+<b id="ruleE">
+10 g
+</b>
+
+</div>
+
+
+<div class="flex justify-between gap-4">
+
+<span>Allowed MPE</span>
+
+<b id="mpeResult"
+class="text-emerald-600">
+
+± 10.0 g
+
+</b>
+
+</div>
+
+</div>
+
+
+<div class="bg-amber-50 border border-amber-200
+p-4 rounded-lg text-xs">
+
+<strong>OIML Rule Applied:</strong>
+
+MPE tolerance is evaluated against
+the selected scale interval.
+
+</div>
+
+
+<div class="flex justify-between">
+
+<button
+onclick="goToStep(3)"
+class="bg-slate-200 px-4 py-2 rounded-lg">
+
+Back
+
+</button>
+
+
+<button
+onclick="showResult()"
+class="bg-blue-600 text-white
+px-5 py-2 rounded-lg">
+
+Next: Final Result
+
+</button>
+
+</div>
+
+</section>
+
+
+
+<!-- STEP 5 -->
+
+<section id="step-5" class="step hidden space-y-4">
+
+<h3 class="text-xl font-bold">
+
+<i class="fa-solid fa-square-poll-vertical
+text-blue-600 mr-2"></i>
+
+Compliance Result
+
+</h3>
+
+
+<div class="text-center bg-slate-50
+p-8 rounded-xl">
+
+
+<p class="text-xs text-slate-500 uppercase">
+Evaluation Status
+</p>
+
+
+<div id="resultBadge"
+class="inline-block mt-4 px-7 py-3
+rounded-full text-xl font-black status-pass">
+
+PASS
+
+</div>
+
+
+<p id="resultDetail"
+class="text-sm text-slate-600 mt-4">
+
+The error is within the allowed MPE limit.
+
+</p>
+
+</div>
+
+
+<div class="flex justify-between">
+
+<button
+onclick="goToStep(4)"
+class="bg-slate-200 px-4 py-2 rounded-lg">
+
+Back
+
+</button>
+
+
+<button
+onclick="generateReport()"
+class="bg-emerald-600 text-white
+px-5 py-2 rounded-lg">
+
+<i class="fa-solid fa-file-pdf mr-2"></i>
+
+Generate Report
+
+</button>
+
+</div>
+
+</section>
+
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     HISTORY PAGE
+===================================================== -->
+
+<div id="historyPage" class="page hidden-page">
+
+
+<div class="card p-5 mb-5">
+
+
+<div class="flex justify-between items-center gap-3">
+
+<div>
+
+<h2 class="text-2xl font-black">
+
+<i class="fa-solid fa-clock-rotate-left
+text-blue-600 mr-2"></i>
+
+Testing History
+
+</h2>
+
+
+<p class="text-xs text-slate-500 mt-1">
+
+Digital test records & result analytics
+
+</p>
+
+</div>
+
+
+<button
+onclick="closeHistoryPage()"
+class="bg-slate-200 px-4 py-2 rounded-lg">
+
+<i class="fa-solid fa-arrow-left mr-1"></i>
+
+Back
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- SUMMARY -->
+
+<div class="grid grid-cols-1 sm:grid-cols-3
+gap-4 mb-5">
+
+
+<div class="card p-5 text-center">
+
+<p class="text-xs text-slate-500">
+TOTAL TESTS
+</p>
+
+<p id="totalHistory"
+class="text-3xl font-black text-blue-600">
+
+0
+
+</p>
+
+</div>
+
+
+<div class="card p-5 text-center">
+
+<p class="text-xs text-slate-500">
+PASSED
+</p>
+
+<p id="passHistory"
+class="text-3xl font-black text-emerald-600">
+
+0
+
+</p>
+
+</div>
+
+
+<div class="card p-5 text-center">
+
+<p class="text-xs text-slate-500">
+FAILED
+</p>
+
+<p id="failHistory"
+class="text-3xl font-black text-rose-600">
+
+0
+
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- GRAPH -->
+
+<div class="card p-5 mb-5">
+
+<div class="flex justify-between items-center">
+
+<h3 class="font-bold">
+Test Activity
+</h3>
+
+<span class="text-xs text-slate-400">
+Recent tests
+</span>
+
+</div>
+
+
+<div id="historyChart"
+class="history-chart">
+
+</div>
+
+</div>
+
+
+
+<!-- FILTER BUTTONS -->
+
+<div class="grid grid-cols-3 gap-3 mb-5">
+
+
+<button
+onclick="showHistoryType('ALL')"
+class="bg-slate-800 text-white
+py-3 rounded-xl font-bold">
+
+ALL
+
+</button>
+
+
+<button
+onclick="showHistoryType('PASS')"
+class="bg-emerald-600 text-white
+py-3 rounded-xl font-bold">
+
+<i class="fa-solid fa-circle-check mr-1"></i>
+
+PASS
+
+</button>
+
+
+<button
+onclick="showHistoryType('FAIL')"
+class="bg-rose-600 text-white
+py-3 rounded-xl font-bold">
+
+<i class="fa-solid fa-circle-xmark mr-1"></i>
+
+FAIL
+
+</button>
+
+</div>
+
+
+
+<!-- HISTORY LIST -->
+
+<div id="historyList"></div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     REPORT PAGE
+===================================================== -->
+
+<div id="reportPage"
+class="page hidden-page">
+
+
+<div class="report-wrap card p-8">
+
+
+<!-- REPORT HEADER -->
+
+<div class="flex justify-between gap-4
+border-b-2 border-slate-800 pb-5 mb-6">
+
+
+<div>
+
+<h2 class="report-title text-3xl font-black">
+
+OIML R-76 TEST<br>
+
+COMPLIANCE REPORT
+
+</h2>
+
+
+<p class="text-xs text-slate-500 mt-2">
+
+LEGAL METROLOGY AUTOMATED
+VERIFICATION SYSTEM
+
+</p>
+
+
+<p class="text-sm text-blue-600
+font-mono mt-2">
+
+Powered by NAWI BOT AI
+
+</p>
+
+</div>
+
+
+<div class="text-right">
+
+<span id="reportStamp"
+class="inline-block px-4 py-2 rounded-lg
+bg-emerald-600 text-white font-black">
+
+PASSED
+
+</span>
+
+
+<p class="text-xs mt-3">
+
+Report ID:
+
+<span id="reportId"></span>
+
+</p>
+
+
+<p class="text-xs mt-1">
+
+Date:
+
+<span id="reportDate"></span>
+
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- INSTRUMENT -->
+
+<h4 class="font-bold text-slate-500 mb-2">
+
+1. INSTRUMENT SPECIFICATIONS
+
+</h4>
+
+
+<table class="report-table text-sm mb-7">
+
+<tr>
+
+<td><b>Manufacturer</b></td>
+<td id="rManufacturer"></td>
+
+<td><b>Model / Type</b></td>
+<td id="rModel"></td>
+
+</tr>
+
+
+<tr>
+
+<td><b>Serial Number</b></td>
+<td id="rSerial"></td>
+
+<td><b>Accuracy Class</b></td>
+<td id="rClass"></td>
+
+</tr>
+
+
+<tr>
+
+<td><b>Max Capacity</b></td>
+<td id="rMax"></td>
+
+<td><b>Scale Interval</b></td>
+<td id="rE"></td>
+
+</tr>
+
+</table>
+
+
+
+<!-- RESULTS -->
+
+<h4 class="font-bold text-slate-500 mb-2">
+
+2. VERIFICATION TEST RESULTS
+
+</h4>
+
+
+<table class="report-table text-sm text-center">
+
+<tr class="bg-slate-800 text-white">
+
+<th>Test Load</th>
+<th>Reference Mass</th>
+<th>Indicated Mass</th>
+<th>Error</th>
+<th>MPE</th>
+<th>Result</th>
+
+</tr>
+
+
+<tr>
+
+<td id="rTest"></td>
+<td id="rRef"></td>
+<td id="rInd"></td>
+<td id="rErr"></td>
+<td id="rMpe"></td>
+<td id="rResult"></td>
+
+</tr>
+
+</table>
+
+
+
+<!-- SIGNATURE + QR -->
+
+<div class="border-t mt-8 pt-5
+flex justify-between items-center gap-4">
+
+
+<div>
+
+<p class="font-bold">
+Digitally Verified Inspection
+</p>
+
+
+<p class="text-xs text-slate-500 mt-2">
+
+Legal Metrology Inspector
+Signature / Seal:
+
+</p>
+
+
+<p class="text-xs text-slate-500">
+
+Digital Key Verified
+
+</p>
+
+
+<p class="text-xs text-slate-400 mt-2">
+
+Scan QR Code to verify authenticity.
+
+</p>
+
+</div>
+
+
+<div class="text-center flex-shrink-0">
+
+<div id="qrcode"></div>
+
+<p class="text-[9px] text-slate-400 mt-1">
+
+Scan for Verification
+
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- REPORT ACTIONS -->
+
+<div class="no-print mt-8 pt-5 border-t">
+
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+
+<button
+onclick="backFromReport()"
+class="bg-slate-200 px-4 py-3 rounded-lg">
+
+<i class="fa-solid fa-arrow-left mr-1"></i>
+
+Back
+
+</button>
+
+
+<button
+onclick="window.print()"
+class="bg-slate-800 text-white
+px-4 py-3 rounded-lg">
+
+<i class="fa-solid fa-print mr-1"></i>
+
+Print / Save PDF
+
+</button>
+
+
+<button
+onclick="startNextTest()"
+class="bg-blue-600 text-white
+px-4 py-3 rounded-lg font-bold">
+
+Next Test
+
+<i class="fa-solid fa-arrow-right ml-1"></i>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     HARDWARE MODAL
+===================================================== -->
+
+<div
+id="hardwareModal"
+class="hidden fixed inset-0
+bg-slate-900/70 z-50
+flex items-center justify-center p-4">
+
+
+<div class="bg-white rounded-2xl
+p-6 w-full max-w-md">
+
+
+<div class="flex justify-between items-center
+border-b pb-3">
+
+<h3 class="font-bold">
+
+<i class="fa-solid fa-plug
+text-blue-600 mr-2"></i>
+
+Hardware Interface
+
+</h3>
+
+
+<button onclick="closeHardwareModal()">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+
+
+<div class="py-5 space-y-4">
+
+
+<!-- BLUETOOTH -->
+
+<div class="p-4 bg-slate-50 rounded-xl
+border border-slate-200">
+
+
+<div class="flex justify-between
+items-center gap-3">
+
+<div>
+
+<h4 class="font-bold">
+
+<i class="fa-brands fa-bluetooth
+text-blue-600 mr-1"></i>
+
+Bluetooth
+
+</h4>
+
+
+<p class="text-xs text-slate-500">
+
+Search wireless weighing device
+
+</p>
+
+</div>
+
+
+<button
+onclick="scanBluetooth()"
+class="bg-blue-600 text-white
+px-4 py-2 rounded-lg text-xs">
+
+Scan
+
+</button>
+
+</div>
+
+
+<p id="btMessage"
+class="hidden text-xs text-blue-600 mt-4">
+
+<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+
+Scanning Bluetooth devices...
+
+</p>
+
+</div>
+
+
+
+<!-- RS232 -->
+
+<div class="p-4 bg-slate-50 rounded-xl
+border border-slate-200">
+
+
+<div class="flex justify-between
+items-center gap-3">
+
+<div>
+
+<h4 class="font-bold">
+
+<i class="fa-solid fa-plug
+text-blue-600 mr-1"></i>
+
+RS-232
+
+</h4>
+
+
+<p class="text-xs text-slate-500">
+
+Serial cable connection
+
+</p>
+
+</div>
+
+
+<button
+onclick="checkRS232()"
+class="bg-slate-800 text-white
+px-4 py-2 rounded-lg text-xs">
+
+ON / Check
+
+</button>
+
+</div>
+
+
+<div id="rs232Message"
+class="hidden mt-4 text-xs">
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<button
+onclick="closeHardwareModal()"
+class="w-full bg-slate-200
+py-2 rounded-lg">
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+let currentStep = 1;
+let currentRecord = null;
+
+
+
+/* =====================================================
+   STEP NAVIGATION
+===================================================== */
+
+function goToStep(step){
+
+    document.querySelectorAll(".step")
+    .forEach(function(section){
+        section.classList.add("hidden");
+    });
+
+
+    const selected =
+        document.getElementById("step-"+step);
+
+    if(selected){
+        selected.classList.remove("hidden");
+    }
+
+
+    for(let i=1;i<=6;i++){
+
+        const btn =
+            document.getElementById("step-btn-"+i);
+
+        if(i===step){
+
+            btn.className =
+            "step-active border-2 p-2 rounded-lg font-bold";
+
+        }
+
+        else if(i<step){
+
+            btn.className =
+            "step-done border-2 p-2 rounded-lg";
+
+        }
+
+        else{
+
+            btn.className =
+            "border-2 border-slate-200 p-2 rounded-lg text-slate-400";
+
+        }
+
+    }
+
+
+    currentStep = step;
+
+
+    document.getElementById("homePage")
+    .scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+
+}
+
+
+
+/* =====================================================
+   HARDWARE MODAL
+===================================================== */
+
+function openHardwareModal(){
+
+    document.getElementById("hardwareModal")
+    .classList.remove("hidden");
+
+    document.getElementById("btMessage")
+    .classList.add("hidden");
+
+    document.getElementById("rs232Message")
+    .classList.add("hidden");
+
+}
+
+
+function closeHardwareModal(){
+
+    document.getElementById("hardwareModal")
+    .classList.add("hidden");
+
+}
+
+
+
+/* =====================================================
+   BLUETOOTH
+===================================================== */
+
+function scanBluetooth(){
+
+    const msg =
+        document.getElementById("btMessage");
+
+    msg.classList.remove("hidden");
+
+    msg.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin mr-1"></i>
+        Searching Bluetooth devices...
+    `;
+
+
+    setTimeout(function(){
+
+        msg.innerHTML = `
+            <i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i>
+            No compatible Bluetooth weighing device connected.
+        `;
+
+    },2500);
+
+}
+
+
+
+/* =====================================================
+   RS232 CHECK
+===================================================== */
+
+function checkRS232(){
+
+    const msg =
+        document.getElementById("rs232Message");
+
+
+    msg.classList.remove("hidden");
+
+    msg.innerHTML = `
+        <div class="search-animation text-blue-600">
+            <span class="search-dot"></span>
+            <span class="search-dot"></span>
+            <span class="search-dot"></span>
+            <span>Searching RS-232 connection...</span>
+        </div>
+    `;
+
+
+    setTimeout(function(){
+
+        msg.innerHTML = `
+            <div class="p-3 rounded-lg
+            bg-rose-50 border border-rose-200
+            text-rose-700">
+
+                <i class="fa-solid fa-circle-xmark mr-1"></i>
+
+                <strong>RS-232 cable is not connected.</strong>
+
+                <p class="text-[11px] mt-1 text-rose-600">
+
+                Please connect the RS-232 cable and try again.
+
+                </p>
+
             </div>
-            <div class="flex items-center space-x-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-2 h-2 mr-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Offline Mode Ready
+        `;
+
+    },2500);
+
+}
+
+
+
+/* =====================================================
+   CALCULATION
+===================================================== */
+
+function calculateErrors(){
+
+    const ref =
+        parseFloat(
+            document.getElementById("refWeight").value
+        ) || 0;
+
+
+    const ind =
+        parseFloat(
+            document.getElementById("indWeight").value
+        ) || 0;
+
+
+    const error =
+        (ind-ref)*1000;
+
+
+    document.getElementById("calcRef")
+    .innerText =
+        ref.toFixed(2)+" kg";
+
+
+    document.getElementById("calcInd")
+    .innerText =
+        ind.toFixed(2)+" kg";
+
+
+    document.getElementById("errorResult")
+    .innerText =
+        (error>=0?"+":"")+
+        error.toFixed(1)+" g";
+
+
+    goToStep(3);
+
+}
+
+
+
+/* =====================================================
+   OIML RULE
+===================================================== */
+
+function applyRules(){
+
+    const e =
+        parseFloat(
+            document.getElementById("scaleE").value
+        ) || 10;
+
+
+    const cls =
+        document.getElementById("accuracyClass").value;
+
+
+    document.getElementById("ruleClass")
+    .innerText = cls;
+
+
+    document.getElementById("ruleE")
+    .innerText = e+" g";
+
+
+    document.getElementById("mpeResult")
+    .innerText =
+        "± "+e.toFixed(1)+" g";
+
+
+    goToStep(4);
+
+}
+
+
+
+/* =====================================================
+   FINAL RESULT
+===================================================== */
+
+function showResult(){
+
+    const ref =
+        parseFloat(
+            document.getElementById("refWeight").value
+        ) || 0;
+
+
+    const ind =
+        parseFloat(
+            document.getElementById("indWeight").value
+        ) || 0;
+
+
+    const e =
+        parseFloat(
+            document.getElementById("scaleE").value
+        ) || 10;
+
+
+    const error =
+        Math.abs((ind-ref)*1000);
+
+
+    const pass =
+        error <= e;
+
+
+    const badge =
+        document.getElementById("resultBadge");
+
+
+    if(pass){
+
+        badge.innerText="PASS";
+
+        badge.className =
+        "inline-block mt-4 px-7 py-3 rounded-full text-xl font-black status-pass";
+
+
+        document.getElementById("resultDetail")
+        .innerText =
+        "The error is within the allowed OIML R-76 MPE limit.";
+
+    }
+
+    else{
+
+        badge.innerText="FAIL";
+
+        badge.className =
+        "inline-block mt-4 px-7 py-3 rounded-full text-xl font-black status-fail";
+
+
+        document.getElementById("resultDetail")
+        .innerText =
+        "The error exceeds the maximum permissible limit.";
+
+    }
+
+
+    goToStep(5);
+
+}
+
+
+
+/* =====================================================
+   GENERATE REPORT
+===================================================== */
+
+function generateReport(){
+
+    const ref =
+        parseFloat(
+            document.getElementById("refWeight").value
+        ) || 0;
+
+
+    const ind =
+        parseFloat(
+            document.getElementById("indWeight").value
+        ) || 0;
+
+
+    const e =
+        parseFloat(
+            document.getElementById("scaleE").value
+        ) || 10;
+
+
+    const rawError =
+        (ind-ref)*1000;
+
+
+    const pass =
+        Math.abs(rawError)<=e;
+
+
+    const now =
+        new Date();
+
+
+    const reportId =
+        "NAV-"+
+
+        now.getFullYear()+"-"+
+
+        String(now.getMonth()+1)
+        .padStart(2,"0")+"-"+
+
+        String(now.getDate())
+        .padStart(2,"0")+"-"+
+
+        Math.floor(1000+Math.random()*9000);
+
+
+    const record={
+
+        id:reportId,
+
+        timestamp:now.toISOString(),
+
+        date:now.toLocaleDateString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"2-digit",
+                year:"numeric"
+            }
+        ),
+
+        time:now.toLocaleTimeString(
+            "en-IN",
+            {
+                hour:"2-digit",
+                minute:"2-digit",
+                second:"2-digit"
+            }
+        ),
+
+        status:pass?"PASS":"FAIL",
+
+        manufacturer:
+            document.getElementById("manufacturer").value,
+
+        model:
+            document.getElementById("modelNo").value,
+
+        serial:
+            document.getElementById("serialNo").value,
+
+        max:
+            document.getElementById("maxCap").value+
+            " kg",
+
+        accuracy:
+            document.getElementById("accuracyClass").value,
+
+        scaleE:
+            e+" g",
+
+        test:
+            document.getElementById("loadCondition").value,
+
+        reference:
+            ref.toFixed(2)+" kg",
+
+        indicated:
+            ind.toFixed(2)+" kg",
+
+        error:
+            (rawError>=0?"+":"")+
+            rawError.toFixed(1)+" g",
+
+        mpe:
+            "± "+e.toFixed(1)+" g"
+
+    };
+
+
+    saveHistory(record);
+
+
+    currentRecord=record;
+
+
+    showReport(record);
+
+}
+
+
+
+/* =====================================================
+   SAVE HISTORY
+===================================================== */
+
+function saveHistory(record){
+
+    let history=[];
+
+
+    try{
+
+        history =
+        JSON.parse(
+            localStorage.getItem("nawiHistory") || "[]"
+        );
+
+        if(!Array.isArray(history)){
+            history=[];
+        }
+
+    }
+    catch(error){
+
+        history=[];
+
+    }
+
+
+    history.unshift(record);
+
+
+    localStorage.setItem(
+        "nawiHistory",
+        JSON.stringify(history)
+    );
+
+}
+
+
+
+/* =====================================================
+   GET HISTORY
+===================================================== */
+
+function getHistory(){
+
+    try{
+
+        const history =
+            JSON.parse(
+                localStorage.getItem("nawiHistory") || "[]"
+            );
+
+
+        return Array.isArray(history)
+            ? history
+            : [];
+
+    }
+    catch(error){
+
+        return [];
+
+    }
+
+}
+
+
+
+/* =====================================================
+   SHOW REPORT
+===================================================== */
+
+function showReport(record){
+
+    document.getElementById("homePage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("historyPage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("reportPage")
+    .classList.remove("hidden-page");
+
+
+    document.getElementById("reportId")
+    .innerText=record.id;
+
+
+    document.getElementById("reportDate")
+    .innerText=
+        record.date+" "+record.time;
+
+
+    document.getElementById("rManufacturer")
+    .innerText=record.manufacturer;
+
+
+    document.getElementById("rModel")
+    .innerText=record.model;
+
+
+    document.getElementById("rSerial")
+    .innerText=record.serial;
+
+
+    document.getElementById("rClass")
+    .innerText=record.accuracy;
+
+
+    document.getElementById("rMax")
+    .innerText=record.max;
+
+
+    document.getElementById("rE")
+    .innerText=record.scaleE;
+
+
+    document.getElementById("rTest")
+    .innerText=record.test;
+
+
+    document.getElementById("rRef")
+    .innerText=record.reference;
+
+
+    document.getElementById("rInd")
+    .innerText=record.indicated;
+
+
+    document.getElementById("rErr")
+    .innerText=record.error;
+
+
+    document.getElementById("rMpe")
+    .innerText=record.mpe;
+
+
+    const result =
+        document.getElementById("rResult");
+
+
+    result.innerText=record.status;
+
+
+    const stamp =
+        document.getElementById("reportStamp");
+
+
+    if(record.status==="PASS"){
+
+        result.style.color="#047857";
+
+        stamp.innerText="PASSED";
+
+        stamp.className =
+        "inline-block px-4 py-2 rounded-lg bg-emerald-600 text-white font-black";
+
+    }
+
+    else{
+
+        result.style.color="#be123c";
+
+        stamp.innerText="FAILED";
+
+        stamp.className =
+        "inline-block px-4 py-2 rounded-lg bg-rose-600 text-white font-black";
+
+    }
+
+
+    document.getElementById("qrcode")
+    .innerHTML="";
+
+
+    new QRCode(
+        document.getElementById("qrcode"),
+        {
+            text:
+            "NAWI-BOT-VERIFY-"+record.id,
+
+            width:80,
+
+            height:80
+        }
+    );
+
+
+    document.getElementById("reportPage")
+    .scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+
+}
+
+
+
+/* =====================================================
+   HISTORY PAGE
+===================================================== */
+
+function openHistoryPage(){
+
+    document.getElementById("homePage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("reportPage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("historyPage")
+    .classList.remove("hidden-page");
+
+
+    renderHistory("ALL");
+
+
+    document.getElementById("historyPage")
+    .scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+
+}
+
+
+
+function closeHistoryPage(){
+
+    document.getElementById("historyPage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("reportPage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("homePage")
+    .classList.remove("hidden-page");
+
+
+    goToStep(1);
+
+}
+
+
+
+/* =====================================================
+   HISTORY RENDER
+===================================================== */
+
+function renderHistory(type){
+
+    const history=getHistory();
+
+
+    const pass =
+        history.filter(
+            x=>x.status==="PASS"
+        ).length;
+
+
+    const fail =
+        history.filter(
+            x=>x.status==="FAIL"
+        ).length;
+
+
+    document.getElementById("totalHistory")
+    .innerText=history.length;
+
+
+    document.getElementById("passHistory")
+    .innerText=pass;
+
+
+    document.getElementById("failHistory")
+    .innerText=fail;
+
+
+
+    /* GRAPH */
+
+    renderHistoryChart(history);
+
+
+
+    const filtered =
+        type==="ALL"
+        ?history
+        :history.filter(
+            x=>x.status===type
+        );
+
+
+    const list =
+        document.getElementById("historyList");
+
+
+    list.innerHTML="";
+
+
+    if(filtered.length===0){
+
+        list.innerHTML=`
+
+        <div class="card p-10 text-center">
+
+            <div class="text-4xl text-slate-300 mb-3">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+
+            <p class="font-bold text-slate-500">
+                No ${type==="ALL"?"test":type} records yet
+            </p>
+
+            <p class="text-xs text-slate-400 mt-1">
+                Complete a test to create a digital history record.
+            </p>
+
+        </div>
+
+        `;
+
+        return;
+
+    }
+
+
+
+    filtered.forEach(function(record){
+
+        const wrapper =
+            document.createElement("div");
+
+
+        wrapper.className=
+            "history-result";
+
+
+        const statusClass =
+            record.status==="PASS"
+            ?"status-pass"
+            :"status-fail";
+
+
+        wrapper.innerHTML=`
+
+        <div class="history-result-header">
+
+            <div class="flex justify-between
+            items-start gap-3">
+
+                <div>
+
+                    <p class="font-black text-slate-800">
+                        ${record.date}
+                    </p>
+
+                    <p class="text-xs text-slate-500 mt-1">
+                        <i class="fa-regular fa-clock mr-1"></i>
+                        ${record.time}
+                    </p>
+
+                </div>
+
+
+                <span class="${statusClass}
+                px-3 py-1 rounded-full
+                text-xs font-black">
+
+                    ${record.status}
+
                 </span>
-                <span class="text-xs bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 text-slate-300 font-mono">SIH26035</span>
+
             </div>
+
         </div>
-    </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
 
-        <!-- Top Stats Banner -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 no-print">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
-                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-scale-balanced text-xl"></i></div>
-                <div><p class="text-xs text-slate-500 font-medium">Testing Standard</p><p class="text-sm font-bold text-slate-800">OIML R-76 Compliant</p></div>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-circle-check text-xl"></i></div>
-                <div><p class="text-xs text-slate-500 font-medium">Evaluation Mode</p><p class="text-sm font-bold text-slate-800">Automated MPE Check</p></div>
-            </div>
-            
-            <!-- Clickable Hardware Interface Card -->
-            <div onclick="openHardwareModal()" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4 cursor-pointer hover:border-purple-400 transition-all">
-                <div class="p-3 bg-purple-50 text-purple-600 rounded-lg"><i class="fa-solid fa-microchip text-xl"></i></div>
+        <div class="p-4">
+
+
+            <div class="grid grid-cols-2
+            sm:grid-cols-4 gap-4 text-xs">
+
+
                 <div>
-                    <p class="text-xs text-slate-500 font-medium">Hardware Interface</p>
-                    <p class="text-sm font-bold text-purple-600 hover:underline">RS-232 / USB / Bluetooth <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1"></i></p>
-                </div>
-            </div>
 
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-lg"><i class="fa-solid fa-file-contract text-xl"></i></div>
-                <div><p class="text-xs text-slate-500 font-medium">Report Type</p><p class="text-sm font-bold text-slate-800">QR Signed Digital PDF</p></div>
-            </div>
-        </div>
+                    <p class="text-slate-400">
+                        Manufacturer
+                    </p>
 
-        <!-- System Workflow Stepper Header -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 no-print">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">System Workflow (Interactive Stepper)</h2>
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-center text-xs font-medium">
-                <div id="step-btn-1" class="step-active border-2 p-2 rounded-lg transition-all">1. Instrument Reg.</div>
-                <div id="step-btn-2" class="border-2 border-slate-200 p-2 rounded-lg text-slate-400 transition-all">2. Test Entry</div>
-                <div id="step-btn-3" class="border-2 border-slate-200 p-2 rounded-lg text-slate-400 transition-all">3. Calculation</div>
-                <div id="step-btn-4" class="border-2 border-slate-200 p-2 rounded-lg text-slate-400 transition-all">4. OIML R-76 Rules</div>
-                <div id="step-btn-5" class="border-2 border-slate-200 p-2 rounded-lg text-slate-400 transition-all">5. Result</div>
-                <div id="step-btn-6" class="border-2 border-slate-200 p-2 rounded-lg text-slate-400 transition-all">6. Report PDF</div>
-            </div>
-        </div>
+                    <p class="font-bold mt-1">
+                        ${escapeHTML(record.manufacturer)}
+                    </p>
 
-        <!-- Interactive Form Section -->
-        <div id="app-form-container" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 no-print">
-
-            <!-- STEP 1: Instrument Registration -->
-            <div id="step-1" class="step-content space-y-4">
-                <div class="border-b border-slate-100 pb-3">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center"><i class="fa-solid fa-id-card text-blue-600 mr-2"></i> Step 1: Instrument Registration (NAWI Details)</h3>
-                    <p class="text-xs text-slate-500">Enter scale technical specifications according to OIML R-76 guidelines.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Manufacturer</label>
-                        <input type="text" id="manufacturer" value="Essae-Teraoka" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Model Name / No.</label>
-                        <input type="text" id="modelNo" value="DS-852 Digital Scale" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Serial Number</label>
-                        <input type="text" id="serialNo" value="SN-2026-9948" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Max Capacity (Max in kg)</label>
-                        <input type="number" id="maxCap" value="50" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Verification Scale Interval (e in grams)</label>
-                        <input type="number" id="scaleE" value="10" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Accuracy Class</label>
-                        <select id="accuracyClass" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            <option value="Class III">Class III (Medium Accuracy)</option>
-                            <option value="Class II">Class II (High Accuracy)</option>
-                            <option value="Class IIII">Class IIII (Ordinary Accuracy)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end pt-4">
-                    <button onclick="goToStep(2)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg text-sm flex items-center shadow">Next: Test Data Entry <i class="fa-solid fa-arrow-right ml-2"></i></button>
-                </div>
-            </div>
-
-            <!-- STEP 2: Test Data Entry -->
-            <div id="step-2" class="step-content hidden space-y-4">
-                <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-800 flex items-center"><i class="fa-solid fa-vial text-blue-600 mr-2"></i> Step 2: Test Data Entry & Scale Reading</h3>
-                        <p class="text-xs text-slate-500">Capture indicated weight against standard reference weights.</p>
-                    </div>
-                    <button onclick="openHardwareModal()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 font-medium px-3 py-1.5 rounded-lg text-xs flex items-center transition">
-                        <i class="fa-solid fa-plug text-purple-600 mr-1.5"></i> Connect Hardware (USB / Bluetooth)
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Standard Reference Weight (kg)</label>
-                        <input type="number" id="refWeight" value="10.00" step="0.01" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Scale Indicated Weight (kg)</label>
-                        <input type="number" id="indWeight" value="10.01" step="0.01" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Testing Load Condition</label>
-                        <select id="loadCondition" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            <option value="Increasing Load">Increasing Load Test</option>
-                            <option value="Decreasing Load">Decreasing Load Test</option>
-                            <option value="Eccentricity Test">Eccentricity Test (Corner Load)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-between pt-4">
-                    <button onclick="goToStep(1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm">Back</button>
-                    <button onclick="calculateErrors()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg text-sm flex items-center shadow">Next: Calculation <i class="fa-solid fa-arrow-right ml-2"></i></button>
-                </div>
-            </div>
-
-            <!-- STEP 3: Calculation -->
-            <div id="step-3" class="step-content hidden space-y-4">
-                <div class="border-b border-slate-100 pb-3">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center"><i class="fa-solid fa-calculator text-blue-600 mr-2"></i> Step 3: Error Calculation</h3>
-                    <p class="text-xs text-slate-500">Difference calculation between Indicated Weight and Reference Mass.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <div class="p-3 bg-white rounded-lg shadow-sm border border-slate-200 text-center">
-                        <p class="text-xs text-slate-500">Reference Weight (L)</p>
-                        <p id="calcRefWeight" class="text-lg font-bold text-slate-800 mt-1">10.00 kg</p>
-                    </div>
-                    <div class="p-3 bg-white rounded-lg shadow-sm border border-slate-200 text-center">
-                        <p class="text-xs text-slate-500">Indicated Weight (I)</p>
-                        <p id="calcIndWeight" class="text-lg font-bold text-slate-800 mt-1">10.01 kg</p>
-                    </div>
-                </div>
 
-                <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
-                    <p class="text-xs text-blue-600 font-bold uppercase tracking-wider">Calculated Deviation Error (E = I - L)</p>
-                    <p id="resError" class="text-3xl font-extrabold text-blue-700 mt-1">+10.0 g</p>
-                </div>
-
-                <div class="flex justify-between pt-4">
-                    <button onclick="goToStep(2)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm">Back</button>
-                    <button onclick="applyRules()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg text-sm flex items-center shadow">Next: OIML R-76 Rules <i class="fa-solid fa-arrow-right ml-2"></i></button>
-                </div>
-            </div>
-
-            <!-- STEP 4: OIML R-76 Rules -->
-            <div id="step-4" class="step-content hidden space-y-4">
-                <div class="border-b border-slate-100 pb-3">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center"><i class="fa-solid fa-scale-balanced text-blue-600 mr-2"></i> Step 4: OIML R-76 Maximum Permissible Error (MPE) Rules</h3>
-                    <p class="text-xs text-slate-500">Evaluating tolerance limits based on accuracy class and load range.</p>
-                </div>
-
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-                    <div class="flex justify-between items-center text-xs text-slate-700">
-                        <span class="font-bold">Accuracy Class:</span>
-                        <span id="ruleClass" class="font-mono bg-white px-2 py-1 rounded border">Class III</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs text-slate-700">
-                        <span class="font-bold">Verification Scale Interval (e):</span>
-                        <span id="ruleE" class="font-mono bg-white px-2 py-1 rounded border">10 g</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs text-slate-700">
-                        <span class="font-bold">Allowed MPE Limit:</span>
-                        <span id="resMPE" class="font-mono bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded border border-emerald-300">± 10.0 g</span>
-                    </div>
-                </div>
-
-                <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start space-x-2">
-                    <i class="fa-solid fa-circle-info text-amber-600 text-sm mt-0.5"></i>
-                    <div>
-                        <strong>OIML Rule Applied:</strong> Initial verification limit applied ($0 \le m \le 500e$). Standard MPE tolerance evaluated strictly.
-                    </div>
-                </div>
-
-                <div class="flex justify-between pt-4">
-                    <button onclick="goToStep(3)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm">Back</button>
-                    <button onclick="showResult()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg text-sm flex items-center shadow">Next: Final Result <i class="fa-solid fa-arrow-right ml-2"></i></button>
-                </div>
-            </div>
-
-            <!-- STEP 5: Final Result -->
-            <div id="step-5" class="step-content hidden space-y-4">
-                <div class="border-b border-slate-100 pb-3">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center"><i class="fa-solid fa-square-poll-vertical text-blue-600 mr-2"></i> Step 5: Compliance Result</h3>
-                    <p class="text-xs text-slate-500">Final decision on scale accuracy verification.</p>
-                </div>
-
-                <div class="text-center p-6 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Evaluation Status</p>
-                    <div>
-                        <span id="resStatusBadge" class="inline-block px-6 py-2 rounded-full text-lg font-extrabold bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-300">PASS</span>
-                    </div>
-                    <p id="resStatusDetail" class="text-xs text-slate-600">The error is within the allowed OIML R-76 MPE limits.</p>
-                </div>
-
-                <div class="flex justify-between pt-4">
-                    <button onclick="goToStep(4)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm">Back</button>
-                    <button onclick="generateReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-5 py-2 rounded-lg text-sm flex items-center shadow">
-                        <i class="fa-solid fa-file-pdf mr-2"></i> Step 6: Generate PDF Report
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- STEP 6: PDF Report Document View (Print / Download Ready) -->
-        <div id="report-view" class="hidden max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-slate-300 my-4 text-slate-800">
-            <!-- Printable Report Header -->
-            <div class="flex justify-between items-start border-b-2 border-slate-800 pb-4 mb-6">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">OIML R-76 TEST COMPLIANCE REPORT</h2>
-                    <p class="text-xs text-slate-500 uppercase font-semibold">Legal Metrology Automated Verification System</p>
-                    <p class="text-xs text-blue-600 font-mono mt-1">Powered by NAWI BOT AI</p>
+
+                    <p class="text-slate-400">
+                        Model
+                    </p>
+
+                    <p class="font-bold mt-1">
+                        ${escapeHTML(record.model)}
+                    </p>
+
                 </div>
-                <div class="text-right">
-                    <span id="reportStatusStamp" class="inline-block px-4 py-1.5 text-base font-black rounded-md bg-emerald-600 text-white tracking-wider uppercase mb-1">PASSED</span>
-                    <p class="text-xs text-slate-500 font-mono">Report ID: <span id="reportID">NAV-2026-8812</span></p>
-                    <p class="text-xs text-slate-500 font-mono">Date: <span id="reportDate">13-09-2026</span></p>
+
+
+                <div>
+
+                    <p class="text-slate-400">
+                        Serial Number
+                    </p>
+
+                    <p class="font-bold mt-1">
+                        ${escapeHTML(record.serial)}
+                    </p>
+
                 </div>
+
+
+                <div>
+
+                    <p class="text-slate-400">
+                        Error
+                    </p>
+
+                    <p class="font-bold mt-1">
+                        ${escapeHTML(record.error)}
+                    </p>
+
+                </div>
+
             </div>
 
-            <!-- Instrument Details Table -->
-            <div class="mb-6">
-                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. Instrument Specifications</h4>
-                <table class="w-full text-xs border-collapse border border-slate-300">
-                    <tr class="bg-slate-50">
-                        <td class="border border-slate-300 p-2 font-bold w-1/4">Manufacturer:</td>
-                        <td id="rptManufacturer" class="border border-slate-300 p-2 w-1/4">-</td>
-                        <td class="border border-slate-300 p-2 font-bold w-1/4">Model / Type:</td>
-                        <td id="rptModel" class="border border-slate-300 p-2 w-1/4">-</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-slate-300 p-2 font-bold">Serial Number:</td>
-                        <td id="rptSerial" class="border border-slate-300 p-2">-</td>
-                        <td class="border border-slate-300 p-2 font-bold">Accuracy Class:</td>
-                        <td id="rptClass" class="border border-slate-300 p-2">-</td>
-                    </tr>
-                    <tr class="bg-slate-50">
-                        <td class="border border-slate-300 p-2 font-bold">Max Capacity (Max):</td>
-                        <td id="rptMax" class="border border-slate-300 p-2">-</td>
-                        <td class="border border-slate-300 p-2 font-bold">Scale Interval (e):</td>
-                        <td id="rptE" class="border border-slate-300 p-2">-</td>
-                    </tr>
-                </table>
+
+            <div class="mt-4
+            bg-slate-50 rounded-lg p-3">
+
+                <div class="flex justify-between
+                text-xs">
+
+                    <span class="text-slate-500">
+                        Report ID
+                    </span>
+
+                    <span class="font-mono font-bold">
+                        ${escapeHTML(record.id)}
+                    </span>
+
+                </div>
+
             </div>
 
-            <!-- Test Readings & OIML Results -->
-            <div class="mb-6">
-                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">2. Verification Test Results (OIML R-76)</h4>
-                <table class="w-full text-xs border-collapse border border-slate-300 text-center">
-                    <thead>
-                        <tr class="bg-slate-800 text-white">
-                            <th class="border border-slate-300 p-2">Test Load</th>
-                            <th class="border border-slate-300 p-2">Reference Mass (m)</th>
-                            <th class="border border-slate-300 p-2">Indicated Mass (I)</th>
-                            <th class="border border-slate-300 p-2">Error (E = I - L)</th>
-                            <th class="border border-slate-300 p-2">MPE Limit</th>
-                            <th class="border border-slate-300 p-2">Result</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td id="rptTestType" class="border border-slate-300 p-2">Increasing Load</td>
-                            <td id="rptRefW" class="border border-slate-300 p-2">10.00 kg</td>
-                            <td id="rptIndW" class="border border-slate-300 p-2">10.01 kg</td>
-                            <td id="rptErrW" class="border border-slate-300 p-2 font-mono font-bold">+10.0 g</td>
-                            <td id="rptMpeW" class="border border-slate-300 p-2 font-mono">± 10.0 g</td>
-                            <td id="rptResultTd" class="border border-slate-300 p-2 font-bold text-emerald-600">PASS</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
 
-            <!-- Footer & QR Code Verification -->
-            <div class="border-t border-slate-200 pt-4 flex justify-between items-center">
-                <div class="space-y-1">
-                    <p class="text-xs font-bold text-slate-700">Digitally Verified Inspection</p>
-                    <p class="text-[10px] text-slate-500">Legal Metrology Inspector Signature / Seal: Digital Key Verified</p>
-                    <p class="text-[10px] text-slate-400">Scan QR Code on the right to verify authenticity on Cloud Registry.</p>
-                </div>
-                <div class="flex flex-col items-center">
-                    <div id="qrcode" class="p-1 bg-white border border-slate-200 rounded"></div>
-                    <span class="text-[9px] text-slate-400 mt-1 font-mono">Scan for Verification</span>
-                </div>
-            </div>
+            <button
+            class="mt-4 w-full
+            bg-blue-50 hover:bg-blue-100
+            text-blue-700 py-3 rounded-lg
+            text-sm font-bold">
 
-            <!-- Download / Print Action Buttons -->
-            <div class="mt-8 pt-4 border-t border-slate-200 flex justify-between items-center no-print">
-                <button onclick="resetApp()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Start New Test
-                </button>
-                <div class="space-x-3">
-                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg shadow">
-                        <i class="fa-solid fa-print mr-1"></i> Print / Save PDF
-                    </button>
-                </div>
-            </div>
+                <i class="fa-solid fa-file-lines mr-1"></i>
+
+                Open Full Result / Certificate
+
+            </button>
+
         </div>
 
-    </main>
+        `;
 
-    <!-- HARDWARE CONNECTION MODAL -->
-    <div id="hardwareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-base font-bold text-slate-800 flex items-center">
-                    <i class="fa-solid fa-network-wired text-purple-600 mr-2"></i> Hardware Connection Setup
-                </h3>
-                <button onclick="closeHardwareModal()" class="text-slate-400 hover:text-slate-600 text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
 
-            <div class="py-4 space-y-4">
-                <!-- Bluetooth Option -->
-                <div class="p-4 rounded-xl border border-slate-200 hover:border-purple-300 bg-slate-50 transition">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-3">
-                            <i class="fa-brands fa-bluetooth text-2xl text-blue-600"></i>
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-800">Bluetooth Connection</h4>
-                                <p class="text-[11px] text-slate-500">Scan & Connect Wireless Scale</p>
-                            </div>
-                        </div>
-                        <button onclick="connectBluetooth()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium">Scan</button>
-                    </div>
-                    <div id="btStatus" class="mt-2 text-xs text-slate-600 hidden flex items-center space-x-2">
-                        <i class="fa-solid fa-spinner animate-spin text-blue-600"></i>
-                        <span>Scanning Bluetooth devices...</span>
-                    </div>
-                </div>
+        wrapper
+        .querySelector("button")
+        .addEventListener(
+            "click",
+            function(){
+                openSavedReport(record);
+            }
+        );
 
-                <!-- USB Option -->
-                <div class="p-4 rounded-xl border border-slate-200 hover:border-purple-300 bg-slate-50 transition">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-3">
-                            <i class="fa-solid fa-usb text-2xl text-purple-600"></i>
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-800">USB / RS232 Connection</h4>
-                                <p class="text-[11px] text-slate-500">Direct Serial Cable Interface</p>
-                            </div>
-                        </div>
-                        <button onclick="connectUSB()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium">Connect</button>
-                    </div>
-                    <div id="usbStatus" class="mt-2 text-xs text-rose-600 font-semibold hidden flex items-center space-x-1">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        <span>No USB cable is connected.</span>
-                    </div>
-                </div>
-            </div>
 
-            <div class="pt-2 border-t flex justify-end">
-                <button onclick="closeHardwareModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-4 py-2 rounded-lg font-bold">Close</button>
-            </div>
+        list.appendChild(wrapper);
+
+    });
+
+}
+
+
+
+/* =====================================================
+   HISTORY GRAPH
+===================================================== */
+
+function renderHistoryChart(history){
+
+    const chart =
+        document.getElementById("historyChart");
+
+
+    chart.innerHTML="";
+
+
+    if(history.length===0){
+
+        chart.innerHTML=`
+
+        <div class="w-full h-full
+        flex items-center justify-center
+        text-sm text-slate-400">
+
+            No testing activity yet
+
         </div>
-    </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        let currentStep = 1;
+        `;
 
-        function goToStep(step) {
-            document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('report-view').classList.add('hidden');
-            document.getElementById('app-form-container').classList.remove('hidden');
-            
-            document.getElementById(`step-${step}`).classList.remove('hidden');
+        return;
 
-            for (let i = 1; i <= 6; i++) {
-                let btn = document.getElementById(`step-btn-${i}`);
-                if (i === step) {
-                    btn.className = 'step-active border-2 p-2 rounded-lg transition-all font-bold';
-                } else if (i < step) {
-                    btn.className = 'step-done border-2 p-2 rounded-lg transition-all';
-                } else {
-                    btn.className = 'border-2 border-slate-200 p-2 rounded-lg text-slate-400 transition-all';
-                }
-            }
-            currentStep = step;
-        }
+    }
 
-        // Hardware Modal Logic
-        function openHardwareModal() {
-            document.getElementById('hardwareModal').classList.remove('hidden');
-            document.getElementById('btStatus').classList.add('hidden');
-            document.getElementById('usbStatus').classList.add('hidden');
-        }
 
-        function closeHardwareModal() {
-            document.getElementById('hardwareModal').classList.add('hidden');
-        }
+    const recent =
+        history.slice(0,10).reverse();
 
-        function connectUSB() {
-            document.getElementById('usbStatus').classList.remove('hidden');
-        }
 
-        function connectBluetooth() {
-            const btStatus = document.getElementById('btStatus');
-            btStatus.classList.remove('hidden');
-            // Keep scanning without connecting to any device as per instruction
-        }
+    recent.forEach(function(record){
 
-        // Stepper Calculations & Flow Logic
-        function calculateErrors() {
-            const refW = parseFloat(document.getElementById('refWeight').value) || 0;
-            const indW = parseFloat(document.getElementById('indWeight').value) || 0;
+        const column =
+            document.createElement("div");
 
-            document.getElementById('calcRefWeight').innerText = refW.toFixed(2) + ' kg';
-            document.getElementById('calcIndWeight').innerText = indW.toFixed(2) + ' kg';
 
-            const errorGrams = (indW - refW) * 1000;
-            document.getElementById('resError').innerText = (errorGrams >= 0 ? '+' : '') + errorGrams.toFixed(1) + ' g';
+        column.className="chart-column";
 
-            goToStep(3);
-        }
 
-        function applyRules() {
-            const eInGrams = parseFloat(document.getElementById('scaleE').value) || 10;
-            const accuracyClass = document.getElementById('accuracyClass').value;
+        const value =
+            document.createElement("div");
 
-            document.getElementById('ruleClass').innerText = accuracyClass;
-            document.getElementById('ruleE').innerText = eInGrams + ' g';
 
-            const allowedMPE = eInGrams * 1.0;
-            document.getElementById('resMPE').innerText = '± ' + allowedMPE.toFixed(1) + ' g';
+        value.className="chart-value";
 
-            goToStep(4);
-        }
 
-        function showResult() {
-            const refW = parseFloat(document.getElementById('refWeight').value) || 0;
-            const indW = parseFloat(document.getElementById('indWeight').value) || 0;
-            const eInGrams = parseFloat(document.getElementById('scaleE').value) || 10;
+        value.innerText="1";
 
-            const errorGrams = Math.abs((indW - refW) * 1000);
-            const allowedMPE = eInGrams * 1.0;
 
-            const isPass = errorGrams <= allowedMPE;
+        const bar =
+            document.createElement("div");
 
-            const badge = document.getElementById('resStatusBadge');
-            const detail = document.getElementById('resStatusDetail');
 
-            if (isPass) {
-                badge.innerText = 'PASS';
-                badge.className = 'inline-block px-6 py-2 rounded-full text-lg font-extrabold bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-300';
-                detail.innerText = 'The error is within the allowed OIML R-76 MPE limits.';
-            } else {
-                badge.innerText = 'FAIL (Out of MPE)';
-                badge.className = 'inline-block px-6 py-2 rounded-full text-lg font-extrabold bg-rose-100 text-rose-700 shadow-sm border border-rose-300';
-                detail.innerText = 'The error exceeds the maximum permissible limit for this scale.';
-            }
+        bar.className="chart-bar";
 
-            goToStep(5);
-        }
 
-        function generateReport() {
-            // Populate Report Document
-            document.getElementById('rptManufacturer').innerText = document.getElementById('manufacturer').value;
-            document.getElementById('rptModel').innerText = document.getElementById('modelNo').value;
-            document.getElementById('rptSerial').innerText = document.getElementById('serialNo').value;
-            document.getElementById('rptClass').innerText = document.getElementById('accuracyClass').value;
-            document.getElementById('rptMax').innerText = document.getElementById('maxCap').value + ' kg';
-            document.getElementById('rptE').innerText = document.getElementById('scaleE').value + ' g';
+        bar.style.height =
+            record.status==="PASS"
+            ?"85%"
+            :"50%";
 
-            document.getElementById('rptTestType').innerText = document.getElementById('loadCondition').value;
-            document.getElementById('rptRefW').innerText = document.getElementById('refWeight').value + ' kg';
-            document.getElementById('rptIndW').innerText = document.getElementById('indWeight').value + ' kg';
-            document.getElementById('rptErrW').innerText = document.getElementById('resError').innerText;
-            document.getElementById('rptMpeW').innerText = document.getElementById('resMPE').innerText;
 
-            const statusText = document.getElementById('resStatusBadge').innerText;
-            const stamp = document.getElementById('reportStatusStamp');
-            const resultTd = document.getElementById('rptResultTd');
+        const date =
+            document.createElement("div");
 
-            if (statusText.includes('PASS')) {
-                stamp.innerText = 'PASSED';
-                stamp.className = 'inline-block px-4 py-1.5 text-base font-black rounded-md bg-emerald-600 text-white tracking-wider uppercase mb-1';
-                resultTd.innerText = 'PASS';
-                resultTd.className = 'border border-slate-300 p-2 font-bold text-emerald-600';
-            } else {
-                stamp.innerText = 'FAILED';
-                stamp.className = 'inline-block px-4 py-1.5 text-base font-black rounded-md bg-rose-600 text-white tracking-wider uppercase mb-1';
-                resultTd.innerText = 'FAIL';
-                resultTd.className = 'border border-slate-300 p-2 font-bold text-rose-600';
-            }
 
-            // Generate Random Report ID & Date
-            const rptID = 'NAV-2026-' + Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('reportID').innerText = rptID;
+        date.className="chart-date";
 
-            // Generate Verification QR Code
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), {
-                text: `https://nawibot.ai/verify?id=${rptID}&status=${statusText}`,
-                width: 70,
-                height: 70
-            });
 
-            // Hide Form, Show Report View
-            document.getElementById('app-form-container').classList.add('hidden');
-            document.getElementById('report-view').classList.remove('hidden');
+        date.innerText =
+            record.date.substring(0,5);
 
-            // Update Stepper to 6
-            for (let i = 1; i <= 6; i++) {
-                let btn = document.getElementById(`step-btn-${i}`);
-                if (i === 6) {
-                    btn.className = 'step-active border-2 p-2 rounded-lg transition-all font-bold';
-                } else {
-                    btn.className = 'step-done border-2 p-2 rounded-lg transition-all';
-                }
-            }
-            currentStep = 6;
-        }
 
-        function resetApp() {
-            document.getElementById('report-view').classList.add('hidden');
-            document.getElementById('app-form-container').classList.remove('hidden');
-            goToStep(1);
-        }
-    </script>
+        column.appendChild(value);
+
+        column.appendChild(bar);
+
+        column.appendChild(date);
+
+
+        chart.appendChild(column);
+
+    });
+
+}
+
+
+
+/* =====================================================
+   HISTORY FILTER
+===================================================== */
+
+function showHistoryType(type){
+
+    renderHistory(type);
+
+
+    document.getElementById("historyPage")
+    .scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+
+}
+
+
+
+/* =====================================================
+   OPEN SAVED REPORT
+===================================================== */
+
+function openSavedReport(record){
+
+    currentRecord=record;
+
+    showReport(record);
+
+}
+
+
+
+/* =====================================================
+   REPORT BACK
+===================================================== */
+
+function backFromReport(){
+
+    document.getElementById("reportPage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("homePage")
+    .classList.remove("hidden-page");
+
+
+    goToStep(5);
+
+}
+
+
+
+/* =====================================================
+   NEXT TEST
+===================================================== */
+
+function startNextTest(){
+
+    currentRecord=null;
+
+
+    /* Clear test data */
+
+    document.getElementById("refWeight")
+    .value="";
+
+
+    document.getElementById("indWeight")
+    .value="";
+
+
+    document.getElementById("loadCondition")
+    .value="Increasing Load";
+
+
+    document.getElementById("calcRef")
+    .innerText="0.00 kg";
+
+
+    document.getElementById("calcInd")
+    .innerText="0.00 kg";
+
+
+    document.getElementById("errorResult")
+    .innerText="0.0 g";
+
+
+    document.getElementById("reportPage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("historyPage")
+    .classList.add("hidden-page");
+
+
+    document.getElementById("homePage")
+    .classList.remove("hidden-page");
+
+
+    /* IMPORTANT:
+       Go directly to STEP 1 */
+
+    goToStep(1);
+
+}
+
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(value){
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        value ?? "";
+
+    return div.innerHTML;
+
+}
+
+
+
+/* =====================================================
+   START
+===================================================== */
+
+goToStep(1);
+
+</script>
+
 </body>
-</html>
+    </html>
